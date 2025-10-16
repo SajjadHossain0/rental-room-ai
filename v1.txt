@@ -1,0 +1,94 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+# এখানে আমরা দুইটা লাইব্রেরি ইমপোর্ট করছি:
+# pandas (pd) → টেবিল আকারে ডেটা নিয়ে কাজ করার জন্য (যেমন Excel শিটের মতো)
+# DecisionTreeClassifier → এটা একটা Machine Learning Model, যেটা decision নেয় (যেমন: বয়স দেখে কোন রুম দরকার সেটা বোঝা)
+
+dataSet = {
+    'Name': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
+    'Age': [18, 21, 23, 26, 29, 32, 35, 38, 42, 45, 50, 60],
+    'Rent': [6000, 7000, 9000, 10000, 12000, 15000, 17000, 18000, 20000, 22000, 25000, 30000],
+    'City': ['Sylhet', 'Dhaka', 'Gazipur', 'Cumilla', 'Tangail', 'Dhaka', 'Barisal', 'Khulna', 'Rangpur', 'Narayanganj', 'Chattogram', 'Dhaka']
+}
+# এখানে আমরা একটা dictionary বানালাম যেখানে:
+# * Name মানে ভাড়াটিয়ার নাম
+# * Age মানে বয়স
+# * Rent মানে মাসে কত টাকা ভাড়া
+# * City মানে কোন শহরে থাকে
+# এই ডেটা হলো আমাদের training data — মানে model-কে শেখানোর জন্য উদাহরণ।
+
+ds = pd.DataFrame(dataSet)
+# এখন আমরা pandas ব্যবহার করে ওই dictionary-কে DataFrame-এ রূপান্তর করলাম।
+# DataFrame মানে টেবিল আকারে ডেটা, যেখানে column ও row থাকে।
+# তুমি চাইলে `print(ds)` দিলে একদম সুন্দর টেবিল আকারে দেখা যাবে।
+
+def suggest_room(age):
+    if age < 22:
+        return 'Shared Room'
+    elif 22 <= age <= 28:
+        return 'Single Room'
+    elif 29 <= age <= 40:
+        return 'Double Room'
+    else:
+        return 'Family Room'
+# এটা একটা function, নাম `suggest_room()`
+# এই function টা বয়স দেখে রুম সাজেস্ট করে।
+# * যদি বয়স ২২ এর নিচে হয় → "Shared Room" (মানে ছাত্র বা নতুন কেউ)
+# * যদি ২২ থেকে ২৮ এর মধ্যে হয় → "Single Room"
+# * যদি ২৯ থেকে ৪০ → "Double Room"
+# * আর যদি ৪০ এর বেশি → "Family Room"
+# এটা এমন যেন আমরা নিজের বুদ্ধি দিয়ে বলছি কার জন্য কোন রুম উপযুক্ত।
+
+
+ds['RoomType'] = ds['Age'].apply(suggest_room)
+# এই লাইনে আমরা আমাদের DataFrame `ds`-এর মধ্যে নতুন একটা কলাম বানাচ্ছি: `RoomType`
+# `apply()` মানে — প্রতিটা রো-র `Age` কলামে গিয়ে `suggest_room()` function চালাও।
+# ফলে প্রতিটা বয়স অনুযায়ী রুম টাইপ বসে যাবে।
+
+X = ds[['Age']]
+y = ds['RoomType']
+# Machine Learning-এর ভাষায়:
+# * `X` হলো Feature/Input → এখানে বয়স (`Age`)
+# * `y` হলো Label/Output → এখানে রুম টাইপ (`RoomType`)
+# মানে, model-কে শেখানো হবে — "এই বয়সে এই রুম দরকার"।
+
+model = DecisionTreeClassifier()
+model.fit(X, y)
+# এখানে আমরা একটা Decision Tree Model বানালাম।
+# `model.fit(X, y)` মানে:
+# > “এই ডেটা থেকে শিখে নাও — বয়স আর রুম টাইপের সম্পর্কটা কীভাবে কাজ করে।”
+# Decision Tree এমন ভাবে শেখে, যেন সে একাধিক প্রশ্ন করে:
+# > “বয়স ২২ এর নিচে? না?”
+# > “তাহলে ২৯ এর নিচে?”
+# > ইত্যাদি...
+# এভাবে decision নিয়ে সে ভবিষ্যতে নতুন বয়স দেখলে রুম টাইপ বলতে পারবে।
+
+test_ages = [[35], [21], [68]]
+predictions = model.predict(test_ages)
+# এখন আমরা নতুন ৩টা বয়স দিলাম যেগুলা **training data** তে ছিল না:
+# * 35, 21, 68
+# `model.predict()` মানে → “এই বয়সগুলোর জন্য কী রুম লাগবে বলো।”
+# এখন model তার শেখা অনুযায়ী বলে দেবে।
+
+for age, room in zip([35, 21, 68], predictions):
+    print(f"Age: {age} → Suggested Room: {room}")
+# এই লুপটা শুধু প্রিন্ট করার জন্য।
+# `zip()` একসাথে age আর prediction জোড়া লাগায়।
+
+# তারপর সুন্দরভাবে দেখায়:
+# Age: 35 → Suggested Room: Double Room
+# Age: 21 → Suggested Room: Shared Room
+# Age: 68 → Suggested Room: Family Room
+
+
+# ========================
+# USER INPUT নেওয়া
+# ========================
+try:
+    user_age = int(input("\nEnter your age: "))
+    user_prediction = model.predict([[user_age]])
+    print(f"Suggested Room for Age {user_age}: {user_prediction[0]}")
+except ValueError:
+    print("Please enter a valid number for age.")
+
+

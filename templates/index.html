@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Room Suggestion</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      padding: 8px;
+      width: 80%;
+      margin: 10px 0;
+    }
+    button {
+      padding: 8px 15px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>🏠 Room Suggestion AI</h2>
+    <form action="/predict" method="post">
+      <label>Enter your Age:</label><br>
+      <input type="number" name="age" required><br>
+      <button type="submit">Get Suggestion</button>
+    </form>
+      <!--
+      এখানে ইউজার নিজের বয়স লিখবে
+      action="/predict" মানে → এই ফর্ম সাবমিট হলে /predict রাউটে যাবে
+      method="post" মানে → ডেটা পাঠানো হবে POST পদ্ধতিতে (hidden data হিসেবে)
+      <input> → এখানে ইউজার বয়স দেবে
+      name="age" → Flask backend এই নাম ব্যবহার করে ডেটা পাবে (request.form['age'])
+      <button> → সাবমিট করার বাটন
+      যখন বাটনে ক্লিক করা হবে, Flask backend এ যাবে /predict route এ সেখানে model বয়স দেখে “Shared Room”, “Single Room” ইত্যাদি রিটার্ন করবে।
+      -->
+
+    {% if prediction_text %}
+    <div class="result">{{ prediction_text }}</div>
+    {% endif %}
+      <!--
+      এটা হলো Flask-এর Jinja template syntax মানে Python থেকে যে prediction_text পাঠানো হবে, সেটা এখানে দেখাবে।
+      Flask যদি কিছু result পাঠায় (যেমন Suggested Room: Single Room) তাহলে এই <div> অংশটা দেখা যাবে।
+      যদি prediction না থাকে (পেইজ প্রথমবার খোলা), তাহলে কিছুই দেখা যাবে না।
+      -->
+  </div>
+
+</body>
+</html>
